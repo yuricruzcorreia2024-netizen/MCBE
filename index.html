@@ -38,10 +38,31 @@
     <!-- Os cards vão ser inseridos aqui pelo JavaScript -->
   </main>
 
-  <!-- BOTÃO FLUTUANTE PRA ABRIR O PAINEL DE CADASTRO -->
-  <button id="fab-admin" class="fab" title="Cadastrar addon">+</button>
+  <!-- BOTÃO FLUTUANTE: mostra 🔑 (destravar) ou + (cadastrar), conforme o estado -->
+  <button id="fab-admin" class="fab" title="Acesso administrativo">🔑</button>
 
-  <!-- MODAL DE CADASTRO (fica escondido até clicar no botão acima) -->
+  <!-- MODAL 1: PEDIR A CHAVE DE ACESSO -->
+  <div id="modal-chave-overlay" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-cabecalho">
+        <h2>Acesso administrativo</h2>
+        <button id="btn-fechar-chave" class="modal-fechar" type="button">&times;</button>
+      </div>
+
+      <form id="form-chave" class="modal-form">
+        <label>
+          Chave de acesso
+          <input type="password" name="chave" required autofocus />
+        </label>
+
+        <p id="mensagem-erro-chave" class="mensagem-erro"></p>
+
+        <button type="submit" class="modal-enviar">Entrar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: CADASTRAR ITEM (só abre depois da chave aceita) -->
   <div id="modal-overlay" class="modal-overlay">
     <div class="modal">
       <div class="modal-cabecalho">
@@ -50,11 +71,6 @@
       </div>
 
       <form id="form-addon" class="modal-form">
-        <label>
-          Chave de acesso
-          <input type="password" name="chave" required />
-        </label>
-
         <label>
           Categoria
           <select name="categoria" required>
@@ -92,11 +108,6 @@
         <label>
           Link para download
           <input type="url" name="link" required placeholder="https://terabox.com/..." />
-        </label>
-
-        <label class="checkbox-linha">
-          <input type="checkbox" name="lembrar" />
-          Lembrar minha chave neste navegador
         </label>
 
         <p id="mensagem-erro" class="mensagem-erro"></p>

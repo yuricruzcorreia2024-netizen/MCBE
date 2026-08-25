@@ -32,10 +32,33 @@ const campoBusca = document.getElementById("campo-busca");
 const botoesFiltro = document.querySelectorAll(".filtro-btn");
 
 const fab = document.getElementById("fab-admin");
+
+const modalChaveOverlay = document.getElementById("modal-chave-overlay");
+const formChave = document.getElementById("form-chave");
+const btnFecharChave = document.getElementById("btn-fechar-chave");
+const mensagemErroChave = document.getElementById("mensagem-erro-chave");
+
 const modalOverlay = document.getElementById("modal-overlay");
 const btnFechar = document.getElementById("btn-fechar-modal");
 const formAddon = document.getElementById("form-addon");
 const mensagemErro = document.getElementById("mensagem-erro");
+
+// A chave fica guardada aqui em memória (e também no localStorage,
+// pra continuar "destravado" da próxima vez que abrir o site).
+let chaveArmazenada = localStorage.getItem("chaveAdmin") || null;
+
+// Deixa o botão flutuante com a carinha certa: 🔑 se ainda não destravou,
+// + se já destravou.
+function atualizarBotaoFab() {
+  if (chaveArmazenada) {
+    fab.textContent = "+";
+    fab.title = "Cadastrar addon";
+  } else {
+    fab.textContent = "🔑";
+    fab.title = "Acesso administrativo";
+  }
+}
+atualizarBotaoFab();
 
 let todosAddons = [];
 let categoriaAtual = "todos";
@@ -111,12 +134,25 @@ onValue(addonsRef, (snapshot) => {
   aplicarFiltros();
 });
 
-// ===== ABRIR / FECHAR O MODAL =====
+// ===== BOTÃO FLUTUANTE: decide qual modal abrir =====
 fab.addEventListener("click", () => {
-  const chaveSalva = localStorage.getItem("chaveAdmin");
-  if (chaveSalva) formAddon.chave.value = chaveSalva;
-  mensagemErro.textContent = "";
-  modalOverlay.classList.add("aberto");
+  if (chaveArmazenada) {
+    mensagemErro.textContent = "";
+    modalOverlay.classList.add("aberto");
+  } else {
+    mensagemErroChave.textContent = "";
+    modalChaveOverlay.classList.add("aberto");
+  }
+});
+
+btnFecharChave.addEventListener("click", () => {
+  modalChaveOverlay.classList.remove("aberto");
+});
+
+modalChaveOverlay.addEventListener("click", (evento) => {
+  if (evento.target === modalChaveOverlay) {
+    modalChaveOverlay.classList.remove("aberto");
+  }
 });
 
 btnFechar.addEventListener("click", () => {
@@ -124,19 +160,36 @@ btnFechar.addEventListener("click", () => {
 });
 
 modalOverlay.addEventListener("click", (evento) => {
-  // Fecha se clicar fora da caixinha branca (no fundo escurecido)
   if (evento.target === modalOverlay) {
     modalOverlay.classList.remove("aberto");
   }
 });
 
-// ===== ENVIAR O FORMULÁRIO =====
+// ===== ENVIAR A CHAVE (só "destrava" a interface — a validação =====
+// ===== de verdade acontece no banco, na hora de cadastrar) =====
+formChave.addEventListener("submit", (evento) => {
+  evento.preventDefault();
+
+  const chaveDigitada = new FormData(formChave).get("chave").trim();
+
+  chaveArmazenada = chaveDigitada;
+  localStorage.setItem("chaveAdmin", chaveArmazenada);
+  atualizarBotaoFab();
+
+  formChave.reset();
+  modalChaveOverlay.classList.remove("aberto");
+
+  // Já abre direto o formulário de cadastro, pra não precisar clicar de novo.
+  mensagemErro.textContent = "";
+  modalOverlay.classList.add("aberto");
+});
+
+// ===== ENVIAR O FORMULÁRIO DE CADASTRO =====
 formAddon.addEventListener("submit", async (evento) => {
   evento.preventDefault();
   mensagemErro.textContent = "";
 
   const dados = new FormData(formAddon);
-  const chave = dados.get("chave").trim();
 
   const novoAddon = {
     nome: dados.get("nome").trim(),
@@ -152,25 +205,25 @@ formAddon.addEventListener("submit", async (evento) => {
   const novaRef = push(ref(db, "addons"));
   const id = novaRef.key;
 
-  // Gravamos o addon E a "chave enviada" ao mesmo tempo, em dois lugares
+  // Gravamos o addon E a chave guardada ao mesmo tempo, em dois lugares
   // diferentes do banco. As regras de segurança comparam essa chave com
   // a chave verdadeira guardada em config/chave antes de aceitar a gravação.
   const atualizacoes = {};
   atualizacoes[`addons/${id}`] = novoAddon;
-  atualizacoes[`gatekeeper/${id}`] = chave;
+  atualizacoes[`gatekeeper/${id}`] = chaveArmazenada;
 
   try {
     await update(ref(db), atualizacoes);
-
-    if (dados.get("lembrar")) {
-      localStorage.setItem("chaveAdmin", chave);
-    }
-
     formAddon.reset();
     modalOverlay.classList.remove("aberto");
   } catch (erro) {
+    // A chave que estava guardada não é válida de verdade (o Firebase
+    // recusou a gravação) — volta pro estado "trancado" e pede de novo.
     mensagemErro.textContent =
-      "Chave inválida — verifique e tente novamente.";
+      "Chave inválida — o acesso foi revogado, digite a chave correta.";
+    localStorage.removeItem("chaveAdmin");
+    chaveArmazenada = null;
+    atualizarBotaoFab();
     console.error(erro);
   }
 });
