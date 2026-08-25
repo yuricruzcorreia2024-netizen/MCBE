@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCBE — Addons de Minecraft Bedrock</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- CABEÇALHO -->
+  <header class="header">
+    <div class="header-content">
+      <h1 class="logo">📦 MCBE</h1>
+
+      <input
+        type="text"
+        id="campo-busca"
+        class="busca"
+        placeholder="Buscar addon..."
+      />
+    </div>
+  </header>
+
+  <!-- FILTROS DE CATEGORIA -->
+  <nav class="filtros">
+    <button class="filtro-btn ativo" data-categoria="todos">Todos</button>
+    <button class="filtro-btn" data-categoria="addon">Addons</button>
+    <button class="filtro-btn" data-categoria="textura">Texturas</button>
+    <button class="filtro-btn" data-categoria="mapa">Mapas</button>
+  </nav>
+
+  <!-- CONTADOR -->
+  <p class="contador" id="contador">0 addons</p>
+
+  <!-- GRID DE ADDONS -->
+  <main class="grid" id="grid-addons">
+    <!-- Os cards vão ser inseridos aqui pelo JavaScript -->
+  </main>
+
+  <!-- BOTÃO FLUTUANTE PRA ABRIR O PAINEL DE CADASTRO -->
+  <button id="fab-admin" class="fab" title="Cadastrar addon">+</button>
+
+  <!-- MODAL DE CADASTRO (fica escondido até clicar no botão acima) -->
+  <div id="modal-overlay" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-cabecalho">
+        <h2>Adicionar item</h2>
+        <button id="btn-fechar-modal" class="modal-fechar" type="button">&times;</button>
+      </div>
+
+      <form id="form-addon" class="modal-form">
+        <label>
+          Chave de acesso
+          <input type="password" name="chave" required />
+        </label>
+
+        <label>
+          Categoria
+          <select name="categoria" required>
+            <option value="addon">Addon</option>
+            <option value="textura">Textura</option>
+            <option value="mapa">Mapa</option>
+          </select>
+        </label>
+
+        <label>
+          Nome
+          <input type="text" name="nome" required />
+        </label>
+
+        <label>
+          Descrição
+          <textarea name="descricao" rows="3" required></textarea>
+        </label>
+
+        <label>
+          Criador
+          <input type="text" name="criador" required placeholder="Nome de quem fez o addon" />
+        </label>
+
+        <label>
+          Link da capa (imagem estática)
+          <input type="url" name="capa" required placeholder="https://..." />
+        </label>
+
+        <label>
+          Link do preview animado (gif ou mp4)
+          <input type="url" name="preview" placeholder="opcional — usa a capa se deixar vazio" />
+        </label>
+
+        <label>
+          Link para download
+          <input type="url" name="link" required placeholder="https://terabox.com/..." />
+        </label>
+
+        <label class="checkbox-linha">
+          <input type="checkbox" name="lembrar" />
+          Lembrar minha chave neste navegador
+        </label>
+
+        <p id="mensagem-erro" class="mensagem-erro"></p>
+
+        <button type="submit" class="modal-enviar">Cadastrar</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>

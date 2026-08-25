@@ -1,0 +1,20 @@
+{
+  "rules": {
+    "addons": {
+      ".read": true,
+      "$addonId": {
+        ".write": "root.child('gatekeeper').child($addonId).val() === root.child('config').child('chave').val()"
+      }
+    },
+    "gatekeeper": {
+      "$addonId": {
+        ".read": false,
+        ".write": "newData.val() === root.child('config').child('chave').val()"
+      }
+    },
+    "config": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}
