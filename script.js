@@ -227,4 +227,3 @@ formAddon.addEventListener("submit", async (evento) => {
     console.error(erro);
   }
 });
-```[cite: 5]
