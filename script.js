@@ -165,23 +165,43 @@ modalOverlay.addEventListener("click", (evento) => {
   }
 });
 
-// ===== ENVIAR A CHAVE (só "destrava" a interface — a validação =====
-// ===== de verdade acontece no banco, na hora de cadastrar) =====
-formChave.addEventListener("submit", (evento) => {
+// ===== ENVIAR A CHAVE =====
+// Agora a chave é validada NA HORA: fazemos uma gravação de teste no banco
+// (num caminho que não afeta nada visível) e deixamos o Firebase decidir se
+// aceita ou recusa, comparando com a chave verdadeira guardada em config/chave.
+// Só desbloqueamos a interface (e mostramos o formulário de cadastro) se essa
+// gravação de teste for aceita.
+formChave.addEventListener("submit", async (evento) => {
   evento.preventDefault();
+  mensagemErroChave.textContent = "";
 
   const chaveDigitada = new FormData(formChave).get("chave").trim();
+  const btnEnviar = formChave.querySelector("button[type=submit]");
+  btnEnviar.disabled = true;
 
-  chaveArmazenada = chaveDigitada;
-  sessionStorage.setItem("chaveAdmin", chaveArmazenada);
-  atualizarBotaoFab();
+  try {
+    // Gravação de teste: só é aceita pelo Firebase se chaveDigitada bater
+    // com o valor real guardado em config/chave.
+    await update(ref(db), { "gatekeeper/_verificacao": chaveDigitada });
 
-  formChave.reset();
-  modalChaveOverlay.classList.remove("aberto");
+    // Chave correta — desbloqueia a interface de verdade.
+    chaveArmazenada = chaveDigitada;
+    sessionStorage.setItem("chaveAdmin", chaveArmazenada);
+    atualizarBotaoFab();
 
-  // Já abre direto o formulário de cadastro, pra não precisar clicar de novo.
-  mensagemErro.textContent = "";
-  modalOverlay.classList.add("aberto");
+    formChave.reset();
+    modalChaveOverlay.classList.remove("aberto");
+
+    // Já abre direto o formulário de cadastro, pra não precisar clicar de novo.
+    mensagemErro.textContent = "";
+    modalOverlay.classList.add("aberto");
+  } catch (erro) {
+    // O Firebase recusou a gravação de teste — a chave está errada.
+    mensagemErroChave.textContent = "Chave incorreta.";
+    console.error(erro);
+  } finally {
+    btnEnviar.disabled = false;
+  }
 });
 
 // ===== ENVIAR O FORMULÁRIO DE CADASTRO =====
