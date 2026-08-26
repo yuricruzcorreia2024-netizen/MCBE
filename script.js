@@ -43,9 +43,9 @@ const btnFechar = document.getElementById("btn-fechar-modal");
 const formAddon = document.getElementById("form-addon");
 const mensagemErro = document.getElementById("mensagem-erro");
 
-// A chave fica guardada aqui em memória (e também no localStorage,
-// pra continuar "destravado" da próxima vez que abrir o site).
-let chaveArmazenada = localStorage.getItem("chaveAdmin") || null;
+// A chave fica guardada aqui em memória (e também no sessionStorage,
+// pra continuar "destravado" enquanto a aba estiver aberta).
+let chaveArmazenada = sessionStorage.getItem("chaveAdmin") || null;
 
 // Deixa o botão flutuante com a carinha certa: 🔑 se ainda não destravou,
 // + se já destravou.
@@ -84,7 +84,7 @@ function renderizarAddons(lista) {
         <img class="card-imagem-preview" src="${preview}" alt="${addon.nome} - preview" />
       </div>
       <div class="card-corpo">
-        <span class="card-categoria" data-categoria="${addon.categoria}">${addon.categoria}</span>
+        <span class="card-categoria">${addon.categoria}</span>
         <h3 class="card-titulo">${addon.nome}</h3>
         <p class="card-descricao">${addon.descricao}</p>
         ${addon.criador ? `<span class="card-criador">por ${addon.criador}</span>` : ""}
@@ -165,23 +165,47 @@ modalOverlay.addEventListener("click", (evento) => {
   }
 });
 
-// ===== ENVIAR A CHAVE (só "destrava" a interface — a validação =====
-// ===== de verdade acontece no banco, na hora de cadastrar) =====
-formChave.addEventListener("submit", (evento) => {
+// ===== ENVIAR A CHAVE =====
+// Agora a chave é validada NA HORA: fazemos uma gravação de teste no banco
+// (num caminho que não afeta nada visível) e deixamos o Firebase decidir se
+// aceita ou recusa, comparando com a chave verdadeira guardada em config/chave.
+// Só desbloqueamos a interface (e mostramos o formulário de cadastro) se essa
+// gravação de teste for aceita.
+formChave.addEventListener("submit", async (evento) => {
   evento.preventDefault();
+  mensagemErroChave.textContent = "";
 
   const chaveDigitada = new FormData(formChave).get("chave").trim();
 
-  chaveArmazenada = chaveDigitada;
-  localStorage.setItem("chaveAdmin", chaveArmazenada);
-  atualizarBotaoFab();
+  // LOG TEMPORÁRIO DE DEPURAÇÃO — remover depois de resolver o problema.
+  console.log("DEBUG chave digitada:", JSON.stringify(chaveDigitada), "| tamanho:", chaveDigitada.length);
 
-  formChave.reset();
-  modalChaveOverlay.classList.remove("aberto");
+  const btnEnviar = formChave.querySelector("button[type=submit]");
+  btnEnviar.disabled = true;
 
-  // Já abre direto o formulário de cadastro, pra não precisar clicar de novo.
-  mensagemErro.textContent = "";
-  modalOverlay.classList.add("aberto");
+  try {
+    // Gravação de teste: só é aceita pelo Firebase se chaveDigitada bater
+    // com o valor real guardado em config/chave.
+    await update(ref(db), { "gatekeeper/_verificacao": chaveDigitada });
+
+    // Chave correta — desbloqueia a interface de verdade.
+    chaveArmazenada = chaveDigitada;
+    sessionStorage.setItem("chaveAdmin", chaveArmazenada);
+    atualizarBotaoFab();
+
+    formChave.reset();
+    modalChaveOverlay.classList.remove("aberto");
+
+    // Já abre direto o formulário de cadastro, pra não precisar clicar de novo.
+    mensagemErro.textContent = "";
+    modalOverlay.classList.add("aberto");
+  } catch (erro) {
+    // O Firebase recusou a gravação de teste — a chave está errada.
+    mensagemErroChave.textContent = "Chave incorreta.";
+    console.error(erro);
+  } finally {
+    btnEnviar.disabled = false;
+  }
 });
 
 // ===== ENVIAR O FORMULÁRIO DE CADASTRO =====
@@ -221,7 +245,7 @@ formAddon.addEventListener("submit", async (evento) => {
     // recusou a gravação) — volta pro estado "trancado" e pede de novo.
     mensagemErro.textContent =
       "Chave inválida — o acesso foi revogado, digite a chave correta.";
-    localStorage.removeItem("chaveAdmin");
+    sessionStorage.removeItem("chaveAdmin");
     chaveArmazenada = null;
     atualizarBotaoFab();
     console.error(erro);
