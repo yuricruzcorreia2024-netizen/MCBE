@@ -176,6 +176,10 @@ formChave.addEventListener("submit", async (evento) => {
   mensagemErroChave.textContent = "";
 
   const chaveDigitada = new FormData(formChave).get("chave").trim();
+
+  // LOG TEMPORÁRIO DE DEPURAÇÃO — remover depois de resolver o problema.
+  console.log("DEBUG chave digitada:", JSON.stringify(chaveDigitada), "| tamanho:", chaveDigitada.length);
+
   const btnEnviar = formChave.querySelector("button[type=submit]");
   btnEnviar.disabled = true;
 
