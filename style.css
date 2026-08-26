@@ -1,13 +1,23 @@
-/* ===== VARIÁVEIS DE COR (fica fácil trocar o tema depois) ===== */
+/* ===== TOKENS DE DESIGN =====
+   Paleta inspirada em bloco de terra + mesa de trabalho, com cores de
+   raridade do próprio jogo pra diferenciar categorias (esmeralda, diamante,
+   ametista) e ouro pra ações principais (baixar, cadastrar). */
 :root {
-  --bg: #1b1f1a;
-  --bg-elevado: #242a22;
-  --borda: #3a4535;
-  --texto: #eef0e6;
-  --texto-fraco: #9aa593;
-  --acento: #6bbf59;   /* verde "grama" */
-  --acento-forte: #8fd97a;
-  --alerta: #c97b3a;   /* marrom "terra", usado com moderação */
+  --bg: #171310;
+  --painel: #2b241c;
+  --painel-claro: #4d4436;
+  --painel-escuro: #100d0a;
+  --texto: #f1e9d2;
+  --texto-fraco: #b3a688;
+
+  --ouro: #f0c419;
+  --ouro-claro: #ffdd55;
+  --esmeralda: #52d273;
+  --diamante: #63e8e0;
+  --ametista: #b980f0;
+
+  --fonte-pixel: "Press Start 2P", monospace;
+  --fonte-corpo: "Inter", system-ui, sans-serif;
 }
 
 * {
@@ -18,15 +28,41 @@
 
 body {
   background-color: var(--bg);
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)),
+    repeating-linear-gradient(
+      45deg,
+      #1b1712 0px,
+      #1b1712 12px,
+      #181410 12px,
+      #181410 24px
+    );
   color: var(--texto);
-  font-family: "Segoe UI", system-ui, sans-serif;
+  font-family: var(--fonte-corpo);
   padding-bottom: 60px;
+}
+
+/* Efeito "botão de inventário": claro em cima/esquerda, escuro embaixo/direita.
+   Reaproveitado em vários elementos pra dar a sensação de relevo pixelado. */
+.relevo-alto {
+  border-radius: 0;
+  box-shadow:
+    inset 2px 2px 0 var(--painel-claro),
+    inset -2px -2px 0 var(--painel-escuro);
+}
+
+.relevo-fundo {
+  border-radius: 0;
+  box-shadow:
+    inset -2px -2px 0 var(--painel-claro),
+    inset 2px 2px 0 var(--painel-escuro);
 }
 
 /* ===== CABEÇALHO ===== */
 .header {
-  background-color: var(--bg-elevado);
-  border-bottom: 4px solid var(--borda);
+  background-color: var(--painel);
+  border-bottom: 4px solid var(--painel-escuro);
+  box-shadow: inset 0 -2px 0 var(--painel-claro);
   padding: 20px 24px;
 }
 
@@ -41,8 +77,13 @@ body {
 }
 
 .logo {
-  font-size: 1.5rem;
-  letter-spacing: 0.5px;
+  font-family: var(--fonte-pixel);
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  color: var(--ouro-claro);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .busca {
@@ -50,16 +91,24 @@ body {
   min-width: 220px;
   max-width: 360px;
   padding: 10px 14px;
-  background-color: var(--bg);
-  border: 2px solid var(--borda);
-  border-radius: 4px;
+  background-color: var(--painel-escuro);
+  border: none;
+  border-radius: 0;
+  box-shadow:
+    inset 2px 2px 0 rgba(0, 0, 0, 0.5),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.06);
   color: var(--texto);
+  font-family: var(--fonte-corpo);
   font-size: 0.95rem;
 }
 
+.busca::placeholder {
+  color: var(--texto-fraco);
+}
+
 .busca:focus {
-  outline: none;
-  border-color: var(--acento);
+  outline: 2px solid var(--ouro);
+  outline-offset: 1px;
 }
 
 /* ===== FILTROS ===== */
@@ -73,26 +122,37 @@ body {
 }
 
 .filtro-btn {
-  background-color: var(--bg-elevado);
-  border: 2px solid var(--borda);
+  background-color: var(--painel);
+  border: none;
+  border-radius: 0;
+  box-shadow:
+    inset 2px 2px 0 var(--painel-claro),
+    inset -2px -2px 0 var(--painel-escuro);
   color: var(--texto-fraco);
-  padding: 8px 16px;
-  border-radius: 4px;
+  padding: 9px 16px;
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  transition: 0.15s ease;
+  font-family: var(--fonte-corpo);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  transition: color 0.1s ease;
 }
 
 .filtro-btn:hover {
-  border-color: var(--acento);
   color: var(--texto);
 }
 
+.filtro-btn:active,
 .filtro-btn.ativo {
-  background-color: var(--acento);
-  border-color: var(--acento);
-  color: #10130e;
+  box-shadow:
+    inset 2px 2px 0 var(--painel-escuro),
+    inset -2px -2px 0 var(--painel-claro);
+}
+
+.filtro-btn.ativo {
+  background-color: var(--ouro);
+  color: #221a08;
 }
 
 /* ===== CONTADOR ===== */
@@ -101,7 +161,9 @@ body {
   margin: 14px auto 0;
   padding: 0 24px;
   color: var(--texto-fraco);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  font-family: var(--fonte-pixel);
+  letter-spacing: 0.5px;
 }
 
 /* ===== GRID DE ADDONS ===== */
@@ -111,31 +173,32 @@ body {
   padding: 0 24px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 18px;
+  gap: 14px;
 }
 
 .card {
-  background-color: var(--bg-elevado);
-  border: 2px solid var(--borda);
-  border-radius: 6px;
+  background-color: var(--painel);
+  border-radius: 0;
+  box-shadow:
+    inset 2px 2px 0 var(--painel-claro),
+    inset -2px -2px 0 var(--painel-escuro);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.12s ease;
 }
 
 .card:hover {
   transform: translateY(-3px);
-  border-color: var(--acento);
 }
 
-/* Container que empilha a imagem estática e o preview (GIF) uma por cima da outra */
 .card-imagem-wrap {
   position: relative;
   width: 100%;
   height: 140px;
   overflow: hidden;
-  background-color: #0e100c;
+  background-color: var(--painel-escuro);
+  border-bottom: 3px solid var(--painel-escuro);
 }
 
 .card-imagem-estatica,
@@ -149,12 +212,10 @@ body {
   transition: opacity 0.25s ease;
 }
 
-/* A estática começa visível, some no hover */
 .card-imagem-estatica {
   opacity: 1;
 }
 
-/* O preview começa invisível, aparece no hover */
 .card-imagem-preview {
   opacity: 0;
 }
@@ -175,12 +236,31 @@ body {
   flex: 1;
 }
 
+/* Cor da categoria por raridade, igual ao jogo:
+   comum/incomum -> esmeralda, raro -> diamante, épico -> ametista */
 .card-categoria {
-  font-size: 0.7rem;
+  display: inline-block;
+  width: fit-content;
+  font-family: var(--fonte-pixel);
+  font-size: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--acento-forte);
-  font-weight: 700;
+  font-weight: 400;
+  padding: 3px 6px;
+  color: #10130e;
+  background-color: var(--esmeralda);
+}
+
+.card-categoria[data-categoria="addon"] {
+  background-color: var(--esmeralda);
+}
+
+.card-categoria[data-categoria="textura"] {
+  background-color: var(--diamante);
+}
+
+.card-categoria[data-categoria="mapa"] {
+  background-color: var(--ametista);
 }
 
 .card-titulo {
@@ -196,21 +276,37 @@ body {
   flex: 1;
 }
 
+.card-criador {
+  font-size: 0.75rem;
+  color: var(--texto-fraco);
+}
+
 .card-baixar {
   margin-top: 8px;
   display: inline-block;
   text-align: center;
-  background-color: var(--acento);
-  color: #10130e;
+  background-color: var(--ouro);
+  color: #221a08;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   text-decoration: none;
-  padding: 8px 0;
-  border-radius: 4px;
-  font-size: 0.85rem;
+  padding: 9px 0;
+  border-radius: 0;
+  box-shadow:
+    inset 2px 2px 0 var(--ouro-claro),
+    inset -2px -2px 0 #a3790a;
+  font-size: 0.8rem;
 }
 
 .card-baixar:hover {
-  background-color: var(--acento-forte);
+  background-color: var(--ouro-claro);
+}
+
+.card-baixar:active {
+  box-shadow:
+    inset 2px 2px 0 #a3790a,
+    inset -2px -2px 0 var(--ouro-claro);
 }
 
 .vazio {
@@ -220,41 +316,45 @@ body {
   grid-column: 1 / -1;
 }
 
-.card-criador {
-  font-size: 0.75rem;
-  color: var(--texto-fraco);
-}
-
 /* ===== BOTÃO FLUTUANTE (ADMIN) ===== */
 .fab {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  width: 54px;
-  height: 54px;
-  border-radius: 50%;
-  background-color: var(--acento);
-  color: #10130e;
-  font-size: 1.8rem;
+  width: 52px;
+  height: 52px;
+  border-radius: 0;
+  background-color: var(--ouro);
+  color: #221a08;
+  font-size: 1.5rem;
   line-height: 1;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    inset 3px 3px 0 var(--ouro-claro),
+    inset -3px -3px 0 #a3790a,
+    0 4px 14px rgba(0, 0, 0, 0.45);
   z-index: 50;
-  transition: background-color 0.15s ease, transform 0.15s ease;
+  transition: background-color 0.15s ease;
 }
 
 .fab:hover {
-  background-color: var(--acento-forte);
-  transform: scale(1.05);
+  background-color: var(--ouro-claro);
 }
 
-/* ===== MODAL DE CADASTRO ===== */
+.fab:active {
+  box-shadow:
+    inset 3px 3px 0 #a3790a,
+    inset -3px -3px 0 var(--ouro-claro),
+    0 4px 14px rgba(0, 0, 0, 0.45);
+}
+
+/* ===== MODAIS ===== */
 .modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.65);
   align-items: center;
   justify-content: center;
   z-index: 100;
@@ -266,25 +366,32 @@ body {
 }
 
 .modal {
-  background-color: var(--bg-elevado);
-  border: 2px solid var(--borda);
-  border-radius: 8px;
+  background-color: var(--painel);
+  border-radius: 0;
+  box-shadow:
+    inset 3px 3px 0 var(--painel-claro),
+    inset -3px -3px 0 var(--painel-escuro);
   width: 100%;
   max-width: 420px;
   max-height: 90vh;
   overflow-y: auto;
-  padding: 20px;
+  padding: 22px;
 }
 
 .modal-cabecalho {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--painel-escuro);
 }
 
 .modal-cabecalho h2 {
-  font-size: 1.1rem;
+  font-family: var(--fonte-pixel);
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  color: var(--ouro-claro);
 }
 
 .modal-fechar {
@@ -296,67 +403,86 @@ body {
   line-height: 1;
 }
 
+.modal-fechar:hover {
+  color: var(--ouro);
+}
+
 .modal-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   font-size: 0.85rem;
 }
 
 .modal-form label {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   color: var(--texto-fraco);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-weight: 700;
 }
 
 .modal-form input,
 .modal-form select,
 .modal-form textarea {
-  background-color: var(--bg);
-  border: 2px solid var(--borda);
-  border-radius: 4px;
-  padding: 8px 10px;
+  background-color: var(--painel-escuro);
+  border: none;
+  border-radius: 0;
+  box-shadow:
+    inset 2px 2px 0 rgba(0, 0, 0, 0.5),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.06);
+  padding: 9px 10px;
   color: var(--texto);
   font-size: 0.9rem;
-  font-family: inherit;
+  font-family: var(--fonte-corpo);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
   resize: vertical;
 }
 
 .modal-form input:focus,
 .modal-form select:focus,
 .modal-form textarea:focus {
-  outline: none;
-  border-color: var(--acento);
-}
-
-.checkbox-linha {
-  flex-direction: row !important;
-  align-items: center;
-  gap: 8px !important;
-}
-
-.checkbox-linha input {
-  width: auto;
+  outline: 2px solid var(--ouro);
+  outline-offset: 1px;
 }
 
 .mensagem-erro {
-  color: #e07a5f;
-  font-size: 0.8rem;
+  color: #ff6b5e;
+  font-size: 0.78rem;
   min-height: 1em;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
 }
 
 .modal-enviar {
-  background-color: var(--acento);
-  color: #10130e;
+  background-color: var(--ouro);
+  color: #221a08;
   border: none;
-  border-radius: 4px;
-  padding: 10px;
+  border-radius: 0;
+  box-shadow:
+    inset 2px 2px 0 var(--ouro-claro),
+    inset -2px -2px 0 #a3790a;
+  padding: 11px;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-family: var(--fonte-corpo);
 }
 
 .modal-enviar:hover {
-  background-color: var(--acento-forte);
+  background-color: var(--ouro-claro);
+}
+
+.modal-enviar:active {
+  box-shadow:
+    inset 2px 2px 0 #a3790a,
+    inset -2px -2px 0 var(--ouro-claro);
 }
