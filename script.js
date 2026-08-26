@@ -43,9 +43,9 @@ const btnFechar = document.getElementById("btn-fechar-modal");
 const formAddon = document.getElementById("form-addon");
 const mensagemErro = document.getElementById("mensagem-erro");
 
-// A chave fica guardada aqui em memória (e também no localStorage,
-// pra continuar "destravado" da próxima vez que abrir o site).
-let chaveArmazenada = localStorage.getItem("chaveAdmin") || null;
+// A chave fica guardada aqui em memória (e também no sessionStorage,
+// pra continuar "destravado" enquanto a aba estiver aberta).
+let chaveArmazenada = sessionStorage.getItem("chaveAdmin") || null;
 
 // Deixa o botão flutuante com a carinha certa: 🔑 se ainda não destravou,
 // + se já destravou.
@@ -173,7 +173,7 @@ formChave.addEventListener("submit", (evento) => {
   const chaveDigitada = new FormData(formChave).get("chave").trim();
 
   chaveArmazenada = chaveDigitada;
-  localStorage.setItem("chaveAdmin", chaveArmazenada);
+  sessionStorage.setItem("chaveAdmin", chaveArmazenada);
   atualizarBotaoFab();
 
   formChave.reset();
@@ -221,9 +221,10 @@ formAddon.addEventListener("submit", async (evento) => {
     // recusou a gravação) — volta pro estado "trancado" e pede de novo.
     mensagemErro.textContent =
       "Chave inválida — o acesso foi revogado, digite a chave correta.";
-    localStorage.removeItem("chaveAdmin");
+    sessionStorage.removeItem("chaveAdmin");
     chaveArmazenada = null;
     atualizarBotaoFab();
     console.error(erro);
   }
 });
+```[cite: 5]
